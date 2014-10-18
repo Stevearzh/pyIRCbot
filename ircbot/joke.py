@@ -10,7 +10,7 @@ import json
 
 def reply(s):
     try:
-        response = urllib2.urlopen("http://www.tuling123.com/openapi/api?key=&info=笑话")
+        response = urllib2.urlopen("http://www.tuling123.com/openapi/apikey=b1833040534a6bfd761215154069ea58&info=笑话")
         data = response.read()
         result = json.loads(data.decode("utf8"))
         re = result['text']

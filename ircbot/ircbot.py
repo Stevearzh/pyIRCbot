@@ -13,7 +13,7 @@ import weather
 import joke
 import jokeuser
 import helpcmd
-import story
+#import story
 
 irc_host = "irc.freenode.net"
 irc_chan = "#linuxba"
@@ -23,11 +23,11 @@ irc_leng = 120
 
 filter_map = [
     (chat,      lambda s: re.search(R"PRIVMSG(.+?):\>b (.+)", s).group(2)),
-    (joke,      lambda s: re.search(R"PRIVMSG(.+?):\>j(.+)", s).group(2)),   
-    (jokeuser,  lambda s: re.search(R"PRIVMSG(.+?):\>j\.(.+)", s).group(2)),
+    (joke,      lambda s: re.search(R"PRIVMSG(.+?):\>j(.+)", s).group(2)),
+    (jokeuser,  lambda s: re.search(R"PRIVMSG(.+?):\>u (.+)", s).group(2)),
     (weather,   lambda s: re.search(R"PRIVMSG(.+?):\>w (.+)", s).group(2)),
-    (helpcmd,   lambda s: re.search(R"PRIVMSG(.+?):\>\?(.+)", s).group(2)),
-    (story,   lambda s: re.search(R"PRIVMSG(.+?):\>s(.+)", s).group(2)),
+    (helpcmd,   lambda s: re.search(R"PRIVMSG(.+?):\>h(.+)", s).group(2)),
+#    (story,     lambda s: re.search(R"PRIVMSG(.+?):\>s(.+)", s).group(2)),
 ]
 
 # Creating socket 
