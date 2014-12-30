@@ -44,9 +44,8 @@ irc_sock.send("JOIN " + irc_chan + "\r\n")
 while True:
     data = irc_sock.recv(1048576) ### what the fvck?
 
-    if data.lower().startswith("ping"): ### playing ping-pong
-        data = data.lower().replace("ping", "pong")
-        irc_sock.send(data)
+    if data.startswith("PING"): ### playing ping-pong
+        irc_sock.send("PONG")
         print "!!! playing PING-PONG"
         continue
 
