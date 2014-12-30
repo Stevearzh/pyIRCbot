@@ -1,4 +1,4 @@
-#!/usr/bin/env python2
+#!/usr/bin/env python
 #-*- encoding: utf-8 -*-
 
 import sys
@@ -42,43 +42,45 @@ irc_sock.send("USER bzt bzt bzt :bot\r\n")
 irc_sock.send("JOIN " + irc_chan + "\r\n")
 
 while True:
-    data = irc_sock.recv(1048576) ### what the fvck?
+    data = irc_sock.makefile() ### what the fvck?
 
-    if data.startswith("PING"): ### playing ping-pong
-        irc_sock.send("PONG")
-        print "!!! playing PING-PONG"
-        continue
+    for line in data:
+        if line.lower().startswith("ping"): ### playing ping-pong
+            send_back = line.lower().replace("ping", "pong")
+            irc_sock.send(send_back)
+            print "!!! playing PING-PONG"
+            continue
+        else:
+            print line.strip()
 
-    for (filter_mod, filter_fun) in filter_map: ### try matching with each filter
-        try:
-            nickname = re.match(r"^:([^!]+)", data).group(1)
-            content = filter_fun(data)
-            replies = filter_mod.reply(content)
+        for (filter_mod, filter_fun) in filter_map: ### try matching with each filter
+            try:
+                nickname = re.match(r"^:([^!]+)", line).group(1)
+                content = filter_fun(line)
+                replies = filter_mod.reply(content)
 
-            print "<<< " + nickname + ": " + content
-            if len(replies) > irc_leng:
-                head = 0;
-                tail = irc_leng;
-                while (replies[tail]):
-                    while(ord(replies[tail]) & 0xc0 != 0x80):
-                        tail = tail + 1
+                print "<<< " + nickname + ": " + content
+                if len(replies) > irc_leng:
+                    head = 0;
+                    tail = irc_leng;
+                    while (replies[tail]):
+                        while(ord(replies[tail]) & 0xc0 != 0x80):
+                            tail = tail + 1
 
-                    irc_sock.send("PRIVMSG " + irc_chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:tail]))
-                    print ">>> " + replies[head:tail]
-                    time.sleep(1)
-                    head = tail
-                    tail = tail + irc_leng
-                    if tail > len(replies):
-                        irc_sock.send("PRIVMSG " + irc_chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:len(replies)]))
-                        print ">>> " + replies[head:len(replies)]
+                        irc_sock.send("PRIVMSG " + irc_chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:tail]))
+                        print ">>> " + replies[head:tail]
+                        time.sleep(1)
+                        head = tail
+                        tail = tail + irc_leng
+                        if tail > len(replies):
+                            irc_sock.send("PRIVMSG " + irc_chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:len(replies)]))
+                            print ">>> " + replies[head:len(replies)]
 
-            else:
-                for reply in replies.strip().split("\n"):
-                    irc_sock.send("PRIVMSG " + irc_chan + " :"  + "%s: %s\r\n" % (nickname, reply))
-                    print ">>> " + reply
+                else:
+                    for reply in replies.strip().split("\n"):
+                        irc_sock.send("PRIVMSG " + irc_chan + " :"  + "%s: %s\r\n" % (nickname, reply))
+                        print ">>> " + reply
 
-        except Exception as e:
-            pass
+            except Exception as e:
+                pass
 
-    else:
-        print data.strip()
