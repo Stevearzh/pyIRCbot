@@ -13,6 +13,8 @@ import weather
 import joke
 import jokeuser
 import helpcmd
+import maxim
+import fenci
 #import story
 
 irc_host = "irc.freenode.net"
@@ -25,8 +27,10 @@ filter_map = [
     (chat,      lambda s: re.search(R"PRIVMSG(.+?):\>b (.+)", s).group(2)),
     (joke,      lambda s: re.search(R"PRIVMSG(.+?):\>j(.+)", s).group(2)),
     (jokeuser,  lambda s: re.search(R"PRIVMSG(.+?):\>u (.+)", s).group(2)),
+    (maxim,      lambda s: re.search(R"PRIVMSG(.+?):\>m(.+)", s).group(2)),
     (weather,   lambda s: re.search(R"PRIVMSG(.+?):\>w (.+)", s).group(2)),
     (helpcmd,   lambda s: re.search(R"PRIVMSG(.+?):\>h(.+)", s).group(2)),
+    (fenci,      lambda s: re.search(R"PRIVMSG(.+?):\>f (.+)", s).group(2)),
 #    (story,     lambda s: re.search(R"PRIVMSG(.+?):\>s(.+)", s).group(2)),
 ]
 
@@ -45,8 +49,8 @@ while True:
     data = irc_sock.makefile() ### what the fvck?
 
     for line in data:
-        if line.lower().startswith("ping"): ### playing ping-pong
-            send_back = line.lower().replace("ping", "pong")
+        if line.startswith("PING"): ### playing ping-pong
+            send_back = line.replace("PING", "PONG")
             irc_sock.send(send_back)
             print "!!! playing PING-PONG"
             continue
