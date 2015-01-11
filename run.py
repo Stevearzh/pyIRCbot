@@ -18,7 +18,7 @@ ircLeng = 120
 
 # Change API here
 tulingURL = "http://www.tuling123.com/openapi/api?key=b1833040534a6bfd761215154069ea58&info="
-chatURL = "http://www.tuling123.com/openapi/api?key=14fa01eeb5479d7d8c1e8989eeeb0bc3&info="
+chatURL = tulingURL
 jokeURL = tulingURL
 maximURL = "http://api.hitokoto.us/rand?charset=utf-8"
 smURL = "http://xiaofengrobot.sinaapp.com/web.php?para="
