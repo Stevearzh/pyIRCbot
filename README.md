@@ -18,7 +18,7 @@ IRC 聊天机器人 Python 版。使用环境 Python 2.7。
 ["结巴"中文分词项目主页][3]
 
 ## The MIT license (MIT) ##
-Copyright (c) 2014 Stevearzh
+Copyright (c) 2014-2015 Stevearzh
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
