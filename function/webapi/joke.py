@@ -1,4 +1,3 @@
-#!/usr/bin/env python2
 #-*- encoding: utf-8 -*-
 
 import sys
@@ -8,9 +7,9 @@ import urllib
 import urllib2
 import json
 
-def reply(s):
+def reply(url):
     try:
-        response = urllib2.urlopen("http://www.tuling123.com/openapi/api?key=b1833040534a6bfd761215154069ea58&info=笑话")
+        response = urllib2.urlopen(url + "笑话")
         data = response.read()
         result = json.loads(data.decode("utf8"))
         re = result['text']
