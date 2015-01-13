@@ -33,9 +33,12 @@ class ircBot:
 		if len(replies) > limit:
 			head = 0;
 			tail = limit;
-			while (tail < len(replies)):
-				while(ord(replies[tail]) & 0xc0 != 0x80):
-					tail = tail + 1
+			while tail < len(replies):
+				while ord(replies[tail]) & 0xc0 != 0x80:
+					if tail + 1 < len(replies):
+						tail = tail + 1
+					else:
+						break
 				self.Sock.send("PRIVMSG " + self.Chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:tail].replace("\n", "")))
 				print ">>> " + replies[head:tail]
 				time.sleep(1)
