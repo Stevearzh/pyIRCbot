@@ -51,8 +51,8 @@ while True:
 			replies = function.webapi.weather.reply(weatherURL, re.search(R"PRIVMSG(.+?):\>w (.+)", message).group(2))
 		elif re.search(R"PRIVMSG(.+?):\>f (.+)", message):
 			replies = function.fenci.reply(re.search(R"PRIVMSG(.+?):\>f (.+)", message).group(2))
-		elif re.search(R"PRIVMSG(.+?):live\?$", message.strip()):
-			replies = "Yes."
+		elif re.search(R"PRIVMSG(.+?):ping\!$", message.strip()):
+			replies = "Pong!"
 
 		if len(replies) > 0:
 			nickname = re.match(r"^:([^!]+)", message).group(1)
