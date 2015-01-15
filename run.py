@@ -14,7 +14,7 @@ ircHost = "irc.freenode.net"
 ircPort = 6666
 botName = "bzzzt"
 ircChan = "#linuxba"
-ircLeng = 120
+ircLeng = 130
 
 # Change API here
 tulingURL = "http://www.tuling123.com/openapi/api?key=b1833040534a6bfd761215154069ea58&info="
@@ -51,7 +51,7 @@ while True:
 			replies = function.webapi.weather.reply(weatherURL, re.search(R"PRIVMSG(.+?):\>w (.+)", message).group(2))
 		elif re.search(R"PRIVMSG(.+?):\>f (.+)", message):
 			replies = function.fenci.reply(re.search(R"PRIVMSG(.+?):\>f (.+)", message).group(2))
-		elif re.search(R"PRIVMSG(.+?):ping\!$", message.strip()):
+		elif re.search(R"privmsg(.+?):ping\!$", message.strip().lower()):
 			replies = "Pong!"
 
 		if len(replies) > 0:
