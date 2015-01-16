@@ -9,18 +9,20 @@ import time
 
 class ircBot:
 
-	def __init__(self, host, port, nick, channel):
+	def __init__(self, host, port, nick, password, channel):
 		self.Host = host
 		self.Port = port
 		self.Nick = nick
+		self.Password = password
 		self.Chan = channel
 		self.Sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
 	def createConnection(self):
 		self.Sock.connect((self.Host, self.Port))
 		self.Sock.send("NICK " + self.Nick + "\r\n")
+		self.Sock.send("PASS " + self.Nick + ":" + self.Password + "\r\n")
 		self.Sock.send("USER " + self.Nick + " " + self.Nick + " " + self.Nick + " :" + self.Nick + "\r\n")
-		self.Sock.send("JOIN " + self.Chan + "\r\n")
+ 		self.Sock.send("JOIN " + self.Chan + "\r\n")
 
 	def receiveData(self):
 		return self.Sock.makefile()

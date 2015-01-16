@@ -11,8 +11,9 @@ import helpcmd
 
 # Change IRC configuration here
 ircHost = "irc.freenode.net"
-ircPort = 6666
+ircPort = 8000
 botName = "bzzzt"
+botPass = ""
 ircChan = "#linuxba"
 ircLeng = 130
 
@@ -26,7 +27,7 @@ trickURL = tulingURL
 weatherURL = tulingURL
 
 
-bot = ircbot.ircBot(ircHost, ircPort, botName, ircChan)
+bot = ircbot.ircBot(ircHost, ircPort, botName, botPass, ircChan)
 bot.createConnection()
 
 while True:
@@ -53,6 +54,15 @@ while True:
 			replies = function.fenci.reply(re.search(R"PRIVMSG(.+?):\>f (.+)", message).group(2))
 		elif re.search(R"privmsg(.+?):ping\!$", message.strip().lower()):
 			replies = "Pong!"
+		elif re.search(R"JOIN", message.strip()):
+			if re.search(R"PRIVMSG", message.strip()):
+				pass
+			elif re.match(r"^:([^!]+)", message).group(1) == botName:
+				pass
+			else:
+				nickname = re.match(r"^:([^!]+)", message).group(1)
+				print "<<< " + nickname
+				bot.Sock.send("PRIVMSG " + ircChan + " :"  + "?ip " + nickname + "\r\n")
 
 		if len(replies) > 0:
 			nickname = re.match(r"^:([^!]+)", message).group(1)
