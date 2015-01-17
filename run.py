@@ -14,7 +14,7 @@ import socket
 ircHost = "irc.freenode.net"
 ircPort = 8000
 botName = "bzzzt"
-botPass = "ynuhgv5987"
+botPass = ""
 ircChan = "#linuxba"
 ircLeng = 130
 
