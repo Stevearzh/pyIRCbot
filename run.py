@@ -9,11 +9,13 @@ import ircbot
 import function
 import helpcmd
 import socket
+import time
+
 
 # Change IRC configuration here
 ircHost = "irc.freenode.net"
 ircPort = 8000
-botName = "bzzzt"
+botName = "bzzzt_fake_taxi"
 botPass = ""
 ircChan = "#linuxba"
 ircLeng = 130
@@ -29,8 +31,33 @@ weatherURL = tulingURL
 ipURL = "http://ip.taobao.com/service/getIpInfo.php?ip="
 
 
+class ip_once(object):
+        class helper(object):
+                def __init__(self):
+                        self.prev_mday = time.localtime().tm_mday
+                        self.ip_info_set = set()
+
+                def __call__(self, cur_mday, fn, pr):
+                        if self.prev_mday != cur_mday:
+                                self.ip_info_set.clear()
+                                self.prev_mday = cur_mday
+
+                        if pr not in self.ip_info_set:
+                                fn(*pr)
+                                self.ip_info_set.add(pr)
+
+        def __init__(self):
+                self.aux = ip_once.helper()
+
+        def __call__(self, fn, nick, ip):
+                self.aux(time.localtime().tm_mday, fn, (nick, ip))
+
+
+
 bot = ircbot.ircBot(ircHost, ircPort, botName, botPass, ircChan)
 bot.createConnection()
+
+check_the_water_meter = ip_once()
 
 while True:
 	for message in bot.receiveData():
@@ -69,13 +96,16 @@ while True:
 				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
 				if re.search(R"((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){1,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])", origin_ip):
 					ip = re.search(R"((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){1,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])", origin_ip).group(0)
-					bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+					#bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+                                        check_the_water_meter(lambda nick, ip: bot.Sock.send("PRIVMSG " + ircChan + " :" + nick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n"), nickname, ip)
 				elif re.search(R"\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s", origin_ip):
 					ip = re.search(R"\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s", origin_ip).group(0)
-					bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+					#bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+                                        check_the_water_meter(lambda nick, ip: bot.Sock.send("PRIVMSG " + ircChan + " :" + nick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n"), nickname, ip)
 				elif re.search(R"([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}", origin_ip):
 					ip = re.search(R"([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}", origin_ip).group(0)
-					bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+					#bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+                                        check_the_water_meter(lambda nick, ip: bot.Sock.send("PRIVMSG " + ircChan + " :" + nick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n"), nickname, ip)
 
 		if len(replies) > 0:
 			nickname = re.match(r"^:([^!]+)", message).group(1)
