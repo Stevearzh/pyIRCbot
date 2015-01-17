@@ -5,7 +5,7 @@ reload(sys).setdefaultencoding("utf8")
 
 import jieba
 
-def reply(s, url):
+def reply(url, s):
 	try:
 		result = "/".join(jieba.cut(s.rstrip()))
 		return result
