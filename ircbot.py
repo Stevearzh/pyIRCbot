@@ -5,6 +5,11 @@ reload(sys).setdefaultencoding("utf8")
 
 import socket
 import time
+import re
+import function
+from function.webapi.ip import reIPv4
+from function.webapi.ip import reIPv6
+from function.webapi.ip import reURL
 
 
 class ircBot:
@@ -53,3 +58,32 @@ class ircBot:
 			for reply in replies.strip().split("\n"):
 				self.Sock.send("PRIVMSG " + self.Chan + " :"  + "%s: %s\r\n" % (nickname, reply))
 				print ">>> " + reply
+
+	def speakInChannel(self, message):
+		self.Sock.send("PRIVMSG " + self.Chan + " :" + message + "\r\n")
+		print ">>> " + message
+
+	def searchUserLocation(self, message, ipURL):
+		if re.search(R"JOIN", message.strip()):
+			if re.search(R"PRIVMSG", message.strip()):
+				pass
+			elif re.match(r"^:([^!]+)", message).group(1) == self.Nick:
+				pass
+			else:
+				nickname = re.match(r"^:([^!]+)", message).group(1)
+				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
+				if re.search(reIPv4, origin_ip):
+					print "<<< " + nickname
+					ip = re.search(reIPv4, origin_ip).group(0)
+					result = nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)
+					self.speakInChannel(result)
+				elif re.search(reIPv6, origin_ip):
+					print "<<< " + nickname
+					ip = re.search(reIPv6, origin_ip).group(0)
+					result = nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)
+					self.speakInChannel(result)
+				elif re.search(reURL, origin_ip):
+					print "<<< " + nickname
+					ip = re.search(reURL, origin_ip).group(0)
+					result = nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)
+					self.speakInChannel(result)

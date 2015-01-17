@@ -7,7 +7,7 @@ import urllib
 import urllib2
 import json
 
-def reply(url):
+def reply(url, s):
     try:
         response = urllib2.urlopen(url)
         data = response.read()

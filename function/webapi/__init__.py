@@ -10,3 +10,4 @@ import sm
 import trick
 import weather
 import ip
+import ping

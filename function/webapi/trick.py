@@ -9,7 +9,10 @@ import json
 
 def reply(url, s):
     try:
-    	if len(s) < 9:
+        if s.strip() == "Stevearzh":
+            return "玩坏掉了。"
+
+    	if len(s.strip()) < 9:
         	response = urllib2.urlopen(url + "笑话%20大基佬" + urllib.quote(s.encode("utf8")))
         else:
         	response = urllib2.urlopen(url + "笑话%20" + urllib.quote(s.encode("utf8")))

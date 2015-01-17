@@ -8,14 +8,11 @@ import re
 import ircbot
 import function
 import helpcmd
-import socket
-import time
-
 
 # Change IRC configuration here
 ircHost = "irc.freenode.net"
 ircPort = 8000
-botName = "bzzzt_fake_taxi"
+botName = "bzzzt"
 botPass = ""
 ircChan = "#linuxba"
 ircLeng = 130
@@ -30,84 +27,36 @@ trickURL = tulingURL
 weatherURL = tulingURL
 ipURL = "http://ip.taobao.com/service/getIpInfo.php?ip="
 
-
-class ip_once(object):
-        class helper(object):
-                def __init__(self):
-                        self.prev_mday = time.localtime().tm_mday
-                        self.ip_info_set = set()
-
-                def __call__(self, cur_mday, fn, pr):
-                        if self.prev_mday != cur_mday:
-                                self.ip_info_set.clear()
-                                self.prev_mday = cur_mday
-
-                        if pr not in self.ip_info_set:
-                                fn(*pr)
-                                self.ip_info_set.add(pr)
-
-        def __init__(self):
-                self.aux = ip_once.helper()
-
-        def __call__(self, fn, nick, ip):
-                self.aux(time.localtime().tm_mday, fn, (nick, ip))
-
+filterMap = [
+	(helpcmd,                   " ",        lambda s: re.search(R"PRIVMSG(.+?):\>h$", s.strip())),
+	(function.webapi.chat,      chatURL,    lambda s: re.search(R"PRIVMSG(.+?):\>b (.+)", s).group(2)),
+	(function.webapi.joke,      jokeURL,    lambda s: re.search(R"PRIVMSG(.+?):\>j$", s.strip())),
+	(function.webapi.maxim,     maximURL,   lambda s: re.search(R"PRIVMSG(.+?):\>m$", s.strip())),
+	(function.webapi.sm,        smURL,      lambda s: re.search(R"PRIVMSG(.+?):\>s (.+)", s).group(2)),
+	(function.webapi.trick,     trickURL,   lambda s: re.search(R"PRIVMSG(.+?):\>u (.+)", s).group(2)),
+	(function.webapi.weather,   weatherURL, lambda s: re.search(R"PRIVMSG(.+?):\>w (.+)", s).group(2)),
+	(function.fenci,            " ",        lambda s: re.search(R"PRIVMSG(.+?):\>f (.+)", s).group(2)),
+	(function.webapi.ping,      " ",        lambda s: re.search(R"privmsg(.+?):ping\!$", s.strip().lower())),
+	(function.webapi.ip,        ipURL,      lambda s: re.search(R"PRIVMSG(.+?):\>i (.+)", s).group(2).strip())
+]
 
 
 bot = ircbot.ircBot(ircHost, ircPort, botName, botPass, ircChan)
 bot.createConnection()
 
-check_the_water_meter = ip_once()
-
 while True:
 	for message in bot.receiveData():
 		print message
 		bot.responsePingfromServer(message)
+		bot.searchUserLocation(message, ipURL)
 
-		replies = []
-		if re.search(R"PRIVMSG(.+?):\>h$", message.strip()):
-			replies = helpcmd.reply()
-		elif re.search(R"PRIVMSG(.+?):\>b (.+)", message):
-			replies = function.webapi.chat.reply(chatURL, re.search(R"PRIVMSG(.+?):\>b (.+)", message).group(2))
-		elif re.search(R"PRIVMSG(.+?):\>j$", message.strip()):
-			replies = function.webapi.joke.reply(jokeURL)
-		elif re.search(R"PRIVMSG(.+?):\>m$", message.strip()):
-			replies = function.webapi.maxim.reply(maximURL)
-		elif re.search(R"PRIVMSG(.+?):\>s (.+)", message):
-			replies = function.webapi.sm.reply(smURL, re.search(R"PRIVMSG(.+?):\>s (.+)", message).group(2))
-		elif re.search(R"PRIVMSG(.+?):\>u (.+)", message):
-			replies = function.webapi.trick.reply(trickURL, re.search(R"PRIVMSG(.+?):\>u (.+)", message).group(2))
-		elif re.search(R"PRIVMSG(.+?):\>w (.+)", message):
-			replies = function.webapi.weather.reply(weatherURL, re.search(R"PRIVMSG(.+?):\>w (.+)", message).group(2))
-		elif re.search(R"PRIVMSG(.+?):\>f (.+)", message):
-			replies = function.fenci.reply(re.search(R"PRIVMSG(.+?):\>f (.+)", message).group(2))
-		elif re.search(R"privmsg(.+?):ping\!$", message.strip().lower()):
-			replies = "Pong!"
-		elif re.search(R"PRIVMSG(.+?):\>i (.+)", message):
-			replies = function.webapi.ip.reply(ipURL, re.search(R"PRIVMSG(.+?):\>i (.+)", message).group(2).strip())
-		elif re.search(R"JOIN", message.strip()):
-			if re.search(R"PRIVMSG", message.strip()):
+		for (filterMod, filterUrl, filterFun) in filterMap:
+			try:
+				if filterFun(message):
+					nickname = re.match(r"^:([^!]+)", message).group(1)
+					content = filterFun(message)
+					replies = filterMod.reply(filterUrl, content)
+					print "<<< " + nickname
+					bot.replyMessage(replies, nickname, ircLeng)
+			except Exception as e:
 				pass
-			elif re.match(r"^:([^!]+)", message).group(1) == botName:
-				pass
-			else:
-				nickname = re.match(r"^:([^!]+)", message).group(1)
-				print "<<< " + nickname
-				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
-				if re.search(R"((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){1,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])", origin_ip):
-					ip = re.search(R"((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){1,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])", origin_ip).group(0)
-					#bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
-                                        check_the_water_meter(lambda nick, ip: bot.Sock.send("PRIVMSG " + ircChan + " :" + nick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n"), nickname, ip)
-				elif re.search(R"\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s", origin_ip):
-					ip = re.search(R"\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s", origin_ip).group(0)
-					#bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
-                                        check_the_water_meter(lambda nick, ip: bot.Sock.send("PRIVMSG " + ircChan + " :" + nick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n"), nickname, ip)
-				elif re.search(R"([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}", origin_ip):
-					ip = re.search(R"([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}", origin_ip).group(0)
-					#bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
-                                        check_the_water_meter(lambda nick, ip: bot.Sock.send("PRIVMSG " + ircChan + " :" + nick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n"), nickname, ip)
-
-		if len(replies) > 0:
-			nickname = re.match(r"^:([^!]+)", message).group(1)
-			print "<<< " + nickname
-			bot.replyMessage(replies, nickname, ircLeng)
