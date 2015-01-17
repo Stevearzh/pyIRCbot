@@ -8,12 +8,13 @@ import re
 import ircbot
 import function
 import helpcmd
+import socket
 
 # Change IRC configuration here
 ircHost = "irc.freenode.net"
 ircPort = 8000
 botName = "bzzzt"
-botPass = ""
+botPass = "ynuhgv5987"
 ircChan = "#linuxba"
 ircLeng = 130
 
@@ -25,6 +26,7 @@ maximURL = "http://api.hitokoto.us/rand?charset=utf-8"
 smURL = "http://xiaofengrobot.sinaapp.com/web.php?para="
 trickURL = tulingURL
 weatherURL = tulingURL
+ipURL = "http://ip.taobao.com/service/getIpInfo.php?ip="
 
 
 bot = ircbot.ircBot(ircHost, ircPort, botName, botPass, ircChan)
@@ -54,6 +56,8 @@ while True:
 			replies = function.fenci.reply(re.search(R"PRIVMSG(.+?):\>f (.+)", message).group(2))
 		elif re.search(R"privmsg(.+?):ping\!$", message.strip().lower()):
 			replies = "Pong!"
+		elif re.search(R"PRIVMSG(.+?):\>i (.+)", message):
+			replies = function.webapi.ip.reply(ipURL, re.search(R"PRIVMSG(.+?):\>i (.+)", message).group(2).strip())
 		elif re.search(R"JOIN", message.strip()):
 			if re.search(R"PRIVMSG", message.strip()):
 				pass
@@ -62,7 +66,16 @@ while True:
 			else:
 				nickname = re.match(r"^:([^!]+)", message).group(1)
 				print "<<< " + nickname
-				bot.Sock.send("PRIVMSG " + ircChan + " :"  + "?ip " + nickname + "\r\n")
+				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
+				if re.search(R"((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){1,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])", origin_ip):
+					ip = re.search(R"((25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])\.){1,3}(25[0-5]|2[0-4][0-9]|1[0-9][0-9]|[1-9]?[0-9])", origin_ip).group(0)
+					bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+				elif re.search(R"\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s", origin_ip):
+					ip = re.search(R"\s*((([0-9A-Fa-f]{1,4}:){7}([0-9A-Fa-f]{1,4}|:))|(([0-9A-Fa-f]{1,4}:){6}(:[0-9A-Fa-f]{1,4}|((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){5}(((:[0-9A-Fa-f]{1,4}){1,2})|:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3})|:))|(([0-9A-Fa-f]{1,4}:){4}(((:[0-9A-Fa-f]{1,4}){1,3})|((:[0-9A-Fa-f]{1,4})?:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){3}(((:[0-9A-Fa-f]{1,4}){1,4})|((:[0-9A-Fa-f]{1,4}){0,2}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){2}(((:[0-9A-Fa-f]{1,4}){1,5})|((:[0-9A-Fa-f]{1,4}){0,3}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(([0-9A-Fa-f]{1,4}:){1}(((:[0-9A-Fa-f]{1,4}){1,6})|((:[0-9A-Fa-f]{1,4}){0,4}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:))|(:(((:[0-9A-Fa-f]{1,4}){1,7})|((:[0-9A-Fa-f]{1,4}){0,5}:((25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)(\.(25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)){3}))|:)))(%.+)?\s", origin_ip).group(0)
+					bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
+				elif re.search(R"([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}", origin_ip):
+					ip = re.search(R"([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}", origin_ip).group(0)
+					bot.Sock.send("PRIVMSG " + ircChan + " :" + nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip) + "\r\n")
 
 		if len(replies) > 0:
 			nickname = re.match(r"^:([^!]+)", message).group(1)
