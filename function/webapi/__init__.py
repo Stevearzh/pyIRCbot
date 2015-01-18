@@ -11,3 +11,4 @@ import trick
 import weather
 import ip
 import ping
+import py3exec

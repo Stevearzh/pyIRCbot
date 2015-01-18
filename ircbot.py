@@ -36,7 +36,10 @@ class ircBot:
 		if message.startswith("PING"):
 			self.Sock.send(message.replace("PING", "PONG"))
 
-	def replyMessage(self, replies, nickname, limit):
+	def replyMessage(self, fromnick, replies, channel = None, tonick = "", limit = 120):
+		channel = channel or self.Chan
+		if channel == self.Nick:
+			channel = fromnick
 		if len(replies) > limit:
 			head = 0;
 			tail = limit;
@@ -46,22 +49,27 @@ class ircBot:
 						tail = tail + 1
 					else:
 						break
-				self.Sock.send("PRIVMSG " + self.Chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:tail].replace("\n", "")))
+				if tonick:
+					self.Sock.send("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:tail].replace("\n", "")))
+				else:
+					self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:tail].replace("\n", ""))
 				print ">>> " + replies[head:tail]
 				time.sleep(1)
 				head = tail
 				tail = tail + limit
 				if tail > len(replies):
-					self.Sock.send("PRIVMSG " + self.Chan + " :"  + "%s: %s\r\n" % (nickname, replies[head:len(replies)].replace("\n", "")))
+					if tonick:
+						self.Sock.send("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:len(replies)].replace("\n", "")))
+					else:
+						self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:len(replies)].replace("\n", ""))
 					print ">>> " + replies[head:len(replies)]
 		else:
 			for reply in replies.strip().split("\n"):
-				self.Sock.send("PRIVMSG " + self.Chan + " :"  + "%s: %s\r\n" % (nickname, reply))
+				if tonick:
+					self.Sock.send("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply))
+				else:
+					self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % reply)
 				print ">>> " + reply
-
-	def speakInChannel(self, message):
-		self.Sock.send("PRIVMSG " + self.Chan + " :" + message + "\r\n")
-		print ">>> " + message
 
 	def searchUserLocation(self, message, ipURL, check_the_water_meter = ""):
 		if re.search(R"JOIN", message.strip()):
@@ -70,29 +78,29 @@ class ircBot:
 			elif re.match(r"^:([^!]+)", message).group(1) == self.Nick:
 				pass
 			else:
-				nickname = re.match(r"^:([^!]+)", message).group(1)
+				tonick = re.match(r"^:([^!]+)", message).group(1)
 				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
 				if re.search(reIPv4, origin_ip):
-					print "<<< " + nickname
+					print "<<< " + tonick
 					ip = re.search(reIPv4, origin_ip).group(0)
 					if check_the_water_meter:
-						check_the_water_meter(lambda nick, ip: self.speakInChannel(nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), nickname, ip)
+						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), tonick, ip)
 					else:
-						self.speakInChannel(nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
+						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
 				elif re.search(reIPv6, origin_ip):
-					print "<<< " + nickname
+					print "<<< " + tonick
 					ip = re.search(reIPv6, origin_ip).group(0)
 					if check_the_water_meter:
-						check_the_water_meter(lambda nick, ip: self.speakInChannel(nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), nickname, ip)
+						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), tonick, ip)
 					else:
-						self.speakInChannel(nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
+						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
 				elif re.search(reURL, origin_ip):
-					print "<<< " + nickname
+					print "<<< " + tonick
 					ip = re.search(reURL, origin_ip).group(0)
 					if check_the_water_meter:
-						check_the_water_meter(lambda nick, ip: self.speakInChannel(nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), nickname, ip)
+						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), tonick, ip)
 					else:
-						self.speakInChannel(nickname + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
+						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
 
 
 class ip_once(object):
