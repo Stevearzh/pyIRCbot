@@ -42,13 +42,14 @@ filterMap = [
 
 
 bot = ircbot.ircBot(ircHost, ircPort, botName, botPass, ircChan)
+check_the_water_meter = ircbot.ip_once()
 bot.createConnection()
 
 while True:
 	for message in bot.receiveData():
 		print message
 		bot.responsePingfromServer(message)
-		bot.searchUserLocation(message, ipURL)
+		bot.searchUserLocation(message, ipURL, check_the_water_meter)
 
 		for (filterMod, filterUrl, filterFun) in filterMap:
 			try:
