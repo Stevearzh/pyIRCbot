@@ -102,14 +102,14 @@ class ip_once(object):
 			self.prev_mday = time.localtime().tm_mday
 			self.ip_info_set = set()
 
-			def __call__(self, cur_mday, fn, pr):
-				if self.prev_mday != cur_mday:
-					self.ip_info_set.clear()
-					self.prev_mday = cur_mday
+		def __call__(self, cur_mday, fn, pr):
+			if self.prev_mday != cur_mday:
+				self.ip_info_set.clear()
+				self.prev_mday = cur_mday
 
-					if pr not in self.ip_info_set:
-						fn(*pr)
-						self.ip_info_set.add(pr)
+			if pr not in self.ip_info_set:
+				fn(*pr)
+				self.ip_info_set.add(pr)
 
 	def __init__(self):
 		self.aux = self.helper()

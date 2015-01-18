@@ -12,7 +12,7 @@ import helpcmd
 # Change IRC configuration here
 ircHost = "irc.freenode.net"
 ircPort = 8000
-botName = "bzzzt"
+botName = "bzzzt_fake_taxi"
 botPass = ""
 ircChan = "#linuxba"
 ircLeng = 130
