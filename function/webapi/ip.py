@@ -16,7 +16,7 @@ reURL  = "([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}"
 def reply(url, s):
     try:
         if re.match(reIPv4, s):
-            response = urllib2.urlopen(url + s)
+            response = urllib2.urlopen(url + urllib.quote(s.encode("utf8")))
             data = response.read()
             result = json.loads(data)
             if result['code'] == 0:
@@ -24,15 +24,14 @@ def reply(url, s):
                 replies = result['country'] + result['region'] + result['city'] + result['county'] + result['isp']
                 return replies
         elif re.match(reIPv6, s):
-            response = urllib2.urlopen(url + s)
+            response = urllib2.urlopen("http://ip-api.com/json/" + urllib.quote(s.encode("utf8")))
             data = response.read()
-            result = json.loads(data)
-            if result['code'] == 0:
-                result = result['data']
-                replies = result['country'] + result['region'] + result['city'] + result['county'] + result['isp']
+            result = json.loads(data.strip())
+            if result['status'] == "success":
+                replies = result['country'] + ", " + result['regionName'] + ", " + result['city'] + ", " + result['isp']
                 return replies
         elif re.match(reURL, s):
-            response = urllib2.urlopen(url + socket.gethostbyname(s))
+            response = urllib2.urlopen(url + urllib.quote(socket.gethostbyname(s).encode("utf8")))
             data = response.read()
             result = json.loads(data)
             if result['code'] == 0:
