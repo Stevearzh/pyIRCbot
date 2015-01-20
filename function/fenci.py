@@ -5,9 +5,9 @@ reload(sys).setdefaultencoding("utf8")
 
 import jieba
 
-def reply(url, s):
+def reply(string):
 	try:
-		result = "/".join(jieba.cut(s.rstrip()))
+		result = "/".join(jieba.cut(string.rstrip()))
 		return result
 	except:
 		return "玩坏掉了。"

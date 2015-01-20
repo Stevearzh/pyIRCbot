@@ -7,12 +7,14 @@ import urllib
 import urllib2
 import json
 
-def reply(url, s):
-    try:
-        response = urllib2.urlopen(url + urllib.quote(s.encode("utf8")) +"今天的天气")
-        data = response.read()
-        result = json.loads(data.decode("utf8"))
-        re = result['text']
-        return re.decode("utf8")
-    except:
-        return "玩坏掉了。"
+weatherURL = "http://www.tuling123.com/openapi/api?key=b1833040534a6bfd761215154069ea58&info="
+
+def reply(string):
+	try:
+		response = urllib2.urlopen(weather + urllib.quote((string + "今天的天气").encode("utf8")))
+		data = response.read()
+		result = json.loads(data.decode("utf8"))
+		finalResult = result['text']
+		return finalResult.decode("utf8")
+	except:
+		return "玩坏掉了。"

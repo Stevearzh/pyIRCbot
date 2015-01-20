@@ -3,5 +3,5 @@
 import sys
 reload(sys).setdefaultencoding("utf8")
 
-def reply(url, s):
+def reply(string):
 	return "Pong!"

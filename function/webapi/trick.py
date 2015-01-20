@@ -7,18 +7,17 @@ import urllib
 import urllib2
 import json
 
-def reply(url, s):
-    try:
-        if s.strip() == "Stevearzh":
-            return "玩坏掉了。"
+trickURL = "http://www.tuling123.com/openapi/api?key=b1833040534a6bfd761215154069ea58&info="
 
-    	if len(s.strip()) < 9:
-        	response = urllib2.urlopen(url + "笑话%20大基佬" + urllib.quote(s.encode("utf8")))
+def reply(string):
+    try:
+        if len(string.strip()) < 9:
+            response = urllib2.urlopen(trickURL + urllib.quote(("笑话 大基佬" + string).encode("utf8")))
         else:
-        	response = urllib2.urlopen(url + "笑话%20" + urllib.quote(s.encode("utf8")))
+            response = urllib2.urlopen(trickURL + urllib.quote(("笑话 " + string).encode("utf8")))
         data = response.read()
         result = json.loads(data.decode("utf8"))
-        re = result['text']
-        return re.decode("utf8")
+        finalResult = result['text']
+        return finalResult.decode("utf8")
     except:
         return "玩坏掉了。"

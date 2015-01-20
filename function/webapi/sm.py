@@ -7,11 +7,13 @@ import urllib
 import urllib2
 import json
 
-def reply(url, s):
-    try:
-        response = urllib2.urlopen(url + urllib.quote(s.encode("utf8")))
-        data = response.read()
-        re = data[6:-2]
-        return re.decode("unicode-escape")
-    except:
-        return "玩坏掉了。"
+smURL = "http://xiaofengrobot.sinaapp.com/web.php?para="
+
+def reply(string):
+	try:
+		response = urllib2.urlopen(smURL + urllib.quote(string.encode("utf8")))
+		data = response.read()
+		finalResult = data[6:-2]
+		return finalResult.decode("unicode-escape")
+	except:
+		return "玩坏掉了。"

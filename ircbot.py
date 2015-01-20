@@ -71,49 +71,49 @@ class ircBot:
 					self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % reply)
 				print ">>> " + reply
 
-	def searchUserLocation(self, message, ipURL, check_the_water_meter = ""):
+	def searchUserLocation(self, message, check_the_water_meter = ""):
 		if re.search(R"JOIN", message.strip()):
 			if re.search(R"PRIVMSG", message.strip()):
 				pass
-			elif re.match(r"^:([^!]+)", message).group(1) == self.Nick:
+			elif re.match(R"^:([^!]+)", message).group(1) == self.Nick:
 				pass
 			else:
-				tonick = re.match(r"^:([^!]+)", message).group(1)
+				tonick = re.match(R"^:([^!]+)", message).group(1)
 				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
 				if re.search(reIPv4, origin_ip):
 					print "<<< " + tonick
 					ip = re.search(reIPv4, origin_ip).group(0)
 					if check_the_water_meter:
-						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), tonick, ip)
+						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 					else:
-						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
+						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 				elif re.search(reIPv6, origin_ip):
 					print "<<< " + tonick
 					ip = re.search(reIPv6, origin_ip).group(0)
 					if check_the_water_meter:
-						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), tonick, ip)
+						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 					else:
-						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
+						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 				elif re.search(reURL, origin_ip):
 					print "<<< " + tonick
 					ip = re.search(reURL, origin_ip).group(0)
 					if check_the_water_meter:
-						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip)), tonick, ip)
+						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 					else:
-						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ipURL, ip))
+						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 
 
 class ip_once(object):
 
 	class helper(object):
 		def __init__(self):
-			self.prev_mday = time.localtime().tm_mday
+			self.prev_hour = time.localtime().tm_hour
 			self.ip_info_set = set()
 
-		def __call__(self, cur_mday, fn, pr):
-			if self.prev_mday != cur_mday:
+		def __call__(self, cur_hour, fn, pr):
+			if self.prev_hour != cur_hour:
 				self.ip_info_set.clear()
-				self.prev_mday = cur_mday
+				self.prev_hour = cur_hour
 
 			if pr not in self.ip_info_set:
 				fn(*pr)

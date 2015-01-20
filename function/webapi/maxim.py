@@ -7,15 +7,16 @@ import urllib
 import urllib2
 import json
 
-def reply(url, s):
+maximURL = "http://api.hitokoto.us/rand?charset=utf-8"
+
+def reply(string):
     try:
-        response = urllib2.urlopen(url)
+        response = urllib2.urlopen(maximURL)
         data = response.read()
         result = json.loads(data.decode("utf8"))
+        finalResult = result['hitokoto'] + " ——  " + result['author']
         if result['source']:
-        	re = result['hitokoto'] + " ——  " + result['author'] + "，" + result['source']
-        else:
-        	re = result['hitokoto'] + " ——  " + result['author']
-        return re.decode("utf8")
+            finalResult += "，" + result['source']
+        return finalResult.decode("utf8")
     except:
         return "玩坏掉了。"
