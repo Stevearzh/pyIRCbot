@@ -11,7 +11,7 @@ weatherURL = "http://www.tuling123.com/openapi/api?key=b1833040534a6bfd761215154
 
 def reply(string):
 	try:
-		response = urllib2.urlopen(weather + urllib.quote((string + "今天的天气").encode("utf8")))
+		response = urllib2.urlopen(weatherURL + urllib.quote((string + "今天的天气").encode("utf8")))
 		data = response.read()
 		result = json.loads(data.decode("utf8"))
 		finalResult = result['text']
