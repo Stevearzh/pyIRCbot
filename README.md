@@ -1,15 +1,15 @@
 pyIRCbot
 ========
-IRC 聊天机器人 Python 版。使用环境 Python 2.7。
+Python 版 IRC 机器人，使用环境 Python 3.x。Python 2 版本请前往：https://github.com/Stevearzh/pyIRCbot/tree/py2
 
 ## 重构计划 ##
->1.重构为 *Python 3*
+>1.~~重构为&nbsp;*Python 3*~~
 
 >2.重构为*多线程机制*
 
->3.将 *Docker* 整合进机器人中
+>3.将&nbsp;*Docker*&nbsp;整合进机器人中
 
->4.添加本地 *mysql* 数据库新增/检索/删除等功能
+>4.添加本地&nbsp;*mysql*&nbsp;数据库新增/检索/删除等功能
 
 
 ## 图灵机器人 ##
