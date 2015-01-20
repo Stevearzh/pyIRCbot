@@ -4,10 +4,10 @@ import jieba.posseg
 import os
 from operator import itemgetter
 try:
-    from analyzer import ChineseAnalyzer
+    from .analyzer import ChineseAnalyzer
 except ImportError:
     pass
-from textrank import textrank
+from .textrank import textrank
 
 _curpath = os.path.normpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
 abs_path = os.path.join(_curpath, "idf.txt")
@@ -26,7 +26,7 @@ class IDFLoader:
 
     def set_new_path(self, new_idf_path):
         if self.path != new_idf_path:
-            content = open(new_idf_path, 'rb').read().decode('utf-8')
+            content = open(new_idf_path, 'r', encoding='utf-8').read()
             idf_freq = {}
             lines = content.rstrip('\n').split('\n')
             for line in lines:

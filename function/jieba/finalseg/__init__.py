@@ -1,4 +1,3 @@
-from __future__ import with_statement
 import re
 import os
 import marshal
@@ -41,7 +40,7 @@ def load_model():
 if sys.platform.startswith("java"):
     start_P, trans_P, emit_P = load_model()
 else:
-    import prob_start,prob_trans,prob_emit
+    from . import prob_start,prob_trans,prob_emit
     start_P, trans_P, emit_P = prob_start.P, prob_trans.P, prob_emit.P
 
 def viterbi(obs, states, start_p, trans_p, emit_p):
@@ -50,7 +49,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p):
     for y in states: #init
         V[0][y] = start_p[y] + emit_p[y].get(obs[0],MIN_FLOAT)
         path[y] = [y]
-    for t in xrange(1,len(obs)):
+    for t in range(1,len(obs)):
         V.append({})
         newpath = {}
         for y in states:
@@ -84,12 +83,12 @@ def __cut(sentence):
         yield sentence[next:]
 
 def cut(sentence):
-    if not isinstance(sentence, unicode):
+    if not isinstance(sentence, str):
         try:
             sentence = sentence.decode('utf-8')
         except UnicodeDecodeError:
             sentence = sentence.decode('gbk', 'ignore')
-    re_han, re_skip = re.compile(ur"([\u4E00-\u9FA5]+)"), re.compile(ur"(\d+\.\d+|[a-zA-Z0-9]+)")
+    re_han, re_skip = re.compile("([\u4E00-\u9FA5]+)"), re.compile("(\d+\.\d+|[a-zA-Z0-9]+)")
     blocks = re_han.split(sentence)
     for blk in blocks:
         if re_han.match(blk):

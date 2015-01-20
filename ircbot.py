@@ -1,12 +1,8 @@
 #-*- encoding: utf-8 -*-
 
-import sys
-reload(sys).setdefaultencoding("utf8")
-
 import socket
 import time
 import re
-import function
 from function.webapi.ip import reIPv4
 from function.webapi.ip import reIPv6
 from function.webapi.ip import reURL
@@ -24,17 +20,17 @@ class ircBot:
 
 	def createConnection(self):
 		self.Sock.connect((self.Host, self.Port))
-		self.Sock.send("NICK " + self.Nick + "\r\n")
-		self.Sock.send("PASS " + self.Nick + ":" + self.Password + "\r\n")
-		self.Sock.send("USER " + self.Nick + " " + self.Nick + " " + self.Nick + " :" + self.Nick + "\r\n")
- 		self.Sock.send("JOIN " + self.Chan + "\r\n")
+		self.Sock.send(("NICK " + self.Nick + "\r\n").encode())
+		self.Sock.send(("PASS " + self.Nick + ":" + self.Password + "\r\n").encode())
+		self.Sock.send(("USER " + self.Nick + " " + self.Nick + " " + self.Nick + " :" + self.Nick + "\r\n").encode())
+		self.Sock.send(("JOIN " + self.Chan + "\r\n").encode())
 
 	def receiveData(self):
 		return self.Sock.makefile()
 
 	def responsePingfromServer(self, message):
 		if message.startswith("PING"):
-			self.Sock.send(message.replace("PING", "PONG"))
+			self.Sock.send(message.replace("PING", "PONG").encode())
 
 	def replyMessage(self, fromnick, replies, channel = None, tonick = "", limit = 120):
 		channel = channel or self.Chan
@@ -50,26 +46,26 @@ class ircBot:
 					else:
 						break
 				if tonick:
-					self.Sock.send("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:tail].replace("\n", "")))
+					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:tail].replace("\n", ""))).encode())
 				else:
-					self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:tail].replace("\n", ""))
-				print ">>> " + replies[head:tail]
+					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:tail].replace("\n", "")).encode())
+				print(">>> " + replies[head:tail])
 				time.sleep(1)
 				head = tail
 				tail = tail + limit
 				if tail > len(replies):
 					if tonick:
-						self.Sock.send("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:len(replies)].replace("\n", "")))
+						self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:len(replies)].replace("\n", ""))).encode())
 					else:
-						self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:len(replies)].replace("\n", ""))
-					print ">>> " + replies[head:len(replies)]
+						self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:len(replies)].replace("\n", "")).encode())
+					print(">>> " + replies[head:len(replies)])
 		else:
 			for reply in replies.strip().split("\n"):
 				if tonick:
-					self.Sock.send("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply))
+					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
 				else:
-					self.Sock.send("PRIVMSG " + channel + " :"  + "%s\r\n" % reply)
-				print ">>> " + reply
+					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+				print(">>> " + reply)
 
 	def searchUserLocation(self, message, check_the_water_meter = ""):
 		if re.search(R"JOIN", message.strip()):
@@ -81,21 +77,21 @@ class ircBot:
 				tonick = re.match(R"^:([^!]+)", message).group(1)
 				origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
 				if re.search(reIPv4, origin_ip):
-					print "<<< " + tonick
+					print("<<< " + tonick)
 					ip = re.search(reIPv4, origin_ip).group(0)
 					if check_the_water_meter:
 						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 					else:
 						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 				elif re.search(reIPv6, origin_ip):
-					print "<<< " + tonick
+					print("<<< " + tonick)
 					ip = re.search(reIPv6, origin_ip).group(0)
 					if check_the_water_meter:
 						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 					else:
 						self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 				elif re.search(reURL, origin_ip):
-					print "<<< " + tonick
+					print("<<< " + tonick)
 					ip = re.search(reURL, origin_ip).group(0)
 					if check_the_water_meter:
 						check_the_water_meter(lambda nick, ip: self.replyMessage("", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)

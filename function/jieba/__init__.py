@@ -1,11 +1,10 @@
-from __future__ import with_statement
 __version__ = '0.35'
 __license__ = 'MIT'
 
 import re
 import os
 import sys
-import finalseg
+from . import finalseg
 import time
 import tempfile
 import marshal
@@ -47,11 +46,11 @@ def gen_pfdict(f_name):
                 freq = float(freq)
                 lfreq[word] = freq
                 ltotal += freq
-                for ch in xrange(len(word)):
+                for ch in range(len(word)):
                     pfdict.add(word[:ch+1])
-            except ValueError, e:
+            except ValueError as e:
                 logger.debug('%s at line %s %s' % (f_name, lineno, line))
-                raise ValueError, e
+                raise e
     return pfdict, lfreq, ltotal
 
 def initialize(dictionary=None):
@@ -87,8 +86,8 @@ def initialize(dictionary=None):
 
         if load_from_cache_fail:
             pfdict,FREQ,total = gen_pfdict(abs_path)
-            FREQ = dict((k,log(float(v)/total)) for k,v in FREQ.iteritems()) #normalize
-            min_freq = min(FREQ.itervalues())
+            FREQ = dict((k,log(float(v)/total)) for k,v in FREQ.items()) #normalize
+            min_freq = min(FREQ.values())
             logger.debug("Dumping model to file cache %s" % cache_file)
             try:
                 fd, fpath = tempfile.mkstemp()
@@ -125,7 +124,7 @@ def require_initialized(fn):
 def __cut_all(sentence):
     dag = get_DAG(sentence)
     old_j = -1
-    for k,L in dag.iteritems():
+    for k,L in dag.items():
         if len(L) == 1 and k > old_j:
             yield sentence[k:L[0]+1]
             old_j = L[0]
@@ -139,7 +138,7 @@ def __cut_all(sentence):
 def calc(sentence, DAG, route):
     N = len(sentence)
     route[N] = (0.0, '')
-    for idx in xrange(N-1, -1, -1):
+    for idx in range(N-1, -1, -1):
         route[idx] = max((FREQ.get(sentence[idx:x+1],min_freq) + route[x+1][0], x) for x in DAG[idx])
 
 @require_initialized
@@ -147,7 +146,7 @@ def get_DAG(sentence):
     global pfdict, FREQ
     DAG = {}
     N = len(sentence)
-    for k in xrange(N):
+    for k in range(N):
         tmplist = []
         i = k
         frag = sentence[k]
@@ -162,13 +161,13 @@ def get_DAG(sentence):
     return DAG
 
 def __cut_DAG_NO_HMM(sentence):
-    re_eng = re.compile(ur'[a-zA-Z0-9]',re.U)
+    re_eng = re.compile(r'[a-zA-Z0-9]',re.U)
     DAG = get_DAG(sentence)
     route = {}
     calc(sentence, DAG, route)
     x = 0
     N = len(sentence)
-    buf = u''
+    buf = ''
     while x < N:
         y = route[x][1] + 1
         l_word = sentence[x:y]
@@ -178,19 +177,19 @@ def __cut_DAG_NO_HMM(sentence):
         else:
             if buf:
                 yield buf
-                buf = u''
+                buf = ''
             yield l_word
             x = y
     if buf:
         yield buf
-        buf = u''
+        buf = ''
 
 def __cut_DAG(sentence):
     DAG = get_DAG(sentence)
     route = {}
     calc(sentence, DAG, route=route)
     x = 0
-    buf = u''
+    buf = ''
     N = len(sentence)
     while x < N:
         y = route[x][1]+1
@@ -201,7 +200,7 @@ def __cut_DAG(sentence):
             if buf:
                 if len(buf) == 1:
                     yield buf
-                    buf = u''
+                    buf = ''
                 else:
                     if (buf not in FREQ):
                         recognized = finalseg.cut(buf)
@@ -210,7 +209,7 @@ def __cut_DAG(sentence):
                     else:
                         for elem in buf:
                             yield elem
-                    buf = u''
+                    buf = ''
             yield l_word
         x = y
 
@@ -229,11 +228,11 @@ def cut(sentence, cut_all=False, HMM=True):
     '''The main function that segments an entire sentence that contains
     Chinese characters into seperated words.
     Parameter:
-        - sentence: The str/unicode to be segmented.
+        - sentence: The str to be segmented.
         - cut_all: Model type. True for full pattern, False for accurate pattern.
         - HMM: Whether to use the Hidden Markov Model.
     '''
-    if not isinstance(sentence, unicode):
+    if isinstance(sentence, bytes):
         try:
             sentence = sentence.decode('utf-8')
         except UnicodeDecodeError:
@@ -243,9 +242,9 @@ def cut(sentence, cut_all=False, HMM=True):
     # \r\n|\s : whitespace characters. Will not be handled.
 
     if cut_all:
-        re_han, re_skip = re.compile(ur"([\u4E00-\u9FA5]+)", re.U), re.compile(ur"[^a-zA-Z0-9+#\n]", re.U)
+        re_han, re_skip = re.compile("([\u4E00-\u9FA5]+)", re.U), re.compile("[^a-zA-Z0-9+#\n]", re.U)
     else:
-        re_han, re_skip = re.compile(ur"([\u4E00-\u9FA5a-zA-Z0-9+#&\._]+)", re.U), re.compile(ur"(\r\n|\s)", re.U)
+        re_han, re_skip = re.compile("([\u4E00-\u9FA5a-zA-Z0-9+#&\._]+)", re.U), re.compile("(\r\n|\s)", re.U)
     blocks = re_han.split(sentence)
     if cut_all:
         cut_block = __cut_all
@@ -274,12 +273,12 @@ def cut_for_search(sentence, HMM=True):
     words = cut(sentence, HMM=HMM)
     for w in words:
         if len(w) > 2:
-            for i in xrange(len(w)-1):
+            for i in range(len(w)-1):
                 gram2 = w[i:i+2]
                 if gram2 in FREQ:
                     yield gram2
         if len(w) > 3:
-            for i in xrange(len(w)-2):
+            for i in range(len(w)-2):
                 gram3 = w[i:i+3]
                 if gram3 in FREQ:
                     yield gram3
@@ -296,7 +295,7 @@ def load_userdict(f):
     ...
     Word type may be ignored
     '''
-    if isinstance(f, (str, unicode)):
+    if isinstance(f, str):
         f = open(f, 'rb')
     content = f.read().decode('utf-8')
     line_no = 0
@@ -309,7 +308,7 @@ def load_userdict(f):
         if freq.isdigit() is False:
             continue
         if line_no == 1:
-            word = word.replace(u'\ufeff',u"") #remove bom flag if it exists
+            word = word.replace('\ufeff',"") #remove bom flag if it exists
         add_word(*tup)
 
 @require_initialized
@@ -318,7 +317,7 @@ def add_word(word, freq, tag=None):
     FREQ[word] = log(float(freq) / total)
     if tag is not None:
         user_word_tag_tab[word] = tag.strip()
-    for ch in xrange(len(word)):
+    for ch in range(len(word)):
         pfdict.add(word[:ch+1])
 
 __ref_cut = cut
@@ -339,8 +338,6 @@ def enable_parallel(processnum=None):
     global pool, cut, cut_for_search
     if os.name == 'nt':
         raise Exception("jieba: parallel mode only supports posix system")
-    if sys.version_info[0]==2 and sys.version_info[1]<6:
-        raise Exception("jieba: the parallel feature needs Python version>2.5")
     from multiprocessing import Pool, cpu_count
     if processnum is None:
         processnum = cpu_count()
@@ -393,12 +390,12 @@ def get_abs_path_dict():
 def tokenize(unicode_sentence, mode="default", HMM=True):
     """Tokenize a sentence and yields tuples of (word, start, end)
     Parameter:
-        - sentence: the unicode to be segmented.
+        - sentence: the str to be segmented.
         - mode: "default" or "search", "search" is for finer segmentation.
         - HMM: whether to use the Hidden Markov Model.
     """
-    if not isinstance(unicode_sentence, unicode):
-        raise Exception("jieba: the input parameter should be unicode.")
+    if not isinstance(unicode_sentence, str):
+        raise Exception("jieba: the input parameter should be str.")
     start = 0
     if mode == 'default':
         for w in cut(unicode_sentence, HMM=HMM):
@@ -409,12 +406,12 @@ def tokenize(unicode_sentence, mode="default", HMM=True):
         for w in cut(unicode_sentence, HMM=HMM):
             width = len(w)
             if len(w) > 2:
-                for i in xrange(len(w)-1):
+                for i in range(len(w)-1):
                     gram2 = w[i:i+2]
                     if gram2 in FREQ:
                         yield (gram2, start+i, start+i+2)
             if len(w) > 3:
-                for i in xrange(len(w)-2):
+                for i in range(len(w)-2):
                     gram3 = w[i:i+3]
                     if gram3 in FREQ:
                         yield (gram3, start+i, start+i+3)

@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
 import sys
@@ -26,7 +26,7 @@ class UndirectWeightedGraph:
             ws[n] = wsdef
             outSum[n] = sum((e[2] for e in out), 0.0)
 
-        for x in xrange(10):  # 10 iters
+        for x in range(10):  # 10 iters
             for n, inedges in self.graph.items():
                 s = 0
                 for e in inedges:
@@ -35,7 +35,7 @@ class UndirectWeightedGraph:
 
         (min_rank, max_rank) = (sys.float_info[0], sys.float_info[3])
 
-        for w in ws.itervalues():
+        for w in ws.values():
             if w < min_rank:
                 min_rank = w
             elif w > max_rank:
@@ -63,9 +63,9 @@ def textrank(sentence, topK=10, withWeight=False, allowPOS=['ns', 'n', 'vn', 'v'
     cm = collections.defaultdict(int)
     span = 5
     words = list(pseg.cut(sentence))
-    for i in xrange(len(words)):
+    for i in range(len(words)):
         if words[i].flag in pos_filt:
-            for j in xrange(i + 1, i + span):
+            for j in range(i + 1, i + span):
                 if j >= len(words):
                     break
                 if words[j].flag not in pos_filt:
@@ -88,4 +88,4 @@ def textrank(sentence, topK=10, withWeight=False, allowPOS=['ns', 'n', 'vn', 'v'
 if __name__ == '__main__':
     s = "此外，公司拟对全资子公司吉林欧亚置业有限公司增资4.3亿元，增资后，吉林欧亚置业注册资本由7000万元增加到5亿元。吉林欧亚置业主要经营范围为房地产开发及百货零售等业务。目前在建吉林欧亚城市商业综合体项目。2013年，实现营业收入0万元，实现净利润-139.13万元。"
     for x, w in textrank(s, withWeight=True):
-        print x, w
+        print(x, w)

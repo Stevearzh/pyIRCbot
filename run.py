@@ -1,8 +1,5 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- encoding: utf-8 -*-
-
-import sys
-reload(sys).setdefaultencoding("utf8")
 
 import re
 import ircbot
@@ -41,7 +38,7 @@ bot.createConnection()
 
 while True:
 	for message in bot.receiveData():
-		print message
+		print(message)
 		bot.responsePingfromServer(message)
 		bot.searchUserLocation(message, check_the_water_meter)
 
@@ -52,7 +49,7 @@ while True:
 					channel = re.search(R"PRIVMSG(.+?):", message).group(1).strip()
 					content = filterFun(message)
 					replies = filterMod.reply(content)
-					print "<<< " + fromnick
+					print("<<< " + fromnick)
 					bot.replyMessage(fromnick, replies, channel, fromnick, ircLeng)
 			except Exception as e:
 				pass
@@ -64,7 +61,7 @@ while True:
 					channel = re.search(R"PRIVMSG(.+?):", message).group(1).strip()
 					content = filterFun(message)
 					replies = filterMod.reply(content)
-					print "<<< " + fromnick
+					print("<<< " + fromnick)
 					bot.replyMessage(fromnick, replies, channel)
 			except Exception as e:
 				pass

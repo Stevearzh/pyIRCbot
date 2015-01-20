@@ -12,7 +12,7 @@ def viterbi(obs, states, start_p, trans_p, emit_p):
     for y in states.get(obs[0], all_states): #init
         V[0][y] = start_p[y] + emit_p[y].get(obs[0], MIN_FLOAT)
         mem_path[0][y] = ''
-    for t in xrange(1, len(obs)):
+    for t in range(1, len(obs)):
         V.append({})
         mem_path.append({})
         #prev_states = get_top_states(V[t-1])
