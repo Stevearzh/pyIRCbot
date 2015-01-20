@@ -1,10 +1,6 @@
 #-*- encoding: utf-8 -*-
 
-import sys
-reload(sys).setdefaultencoding("utf8")
-
-import urllib
-import urllib2
+import urllib.request
 import socket
 import json
 import re
@@ -17,9 +13,9 @@ taobaoURL = "http://ip.taobao.com/service/getIpInfo.php?ip="
 GeoIPURL = "http://ip-api.com/json/"
 
 def ipv4Search(ip):
-    response = urllib2.urlopen(taobaoURL + urllib.quote(ip.encode("utf8")))
+    response = urllib.request.urlopen(taobaoURL + urllib.request.quote(ip.encode("utf8")))
     data = response.read()
-    result = json.loads(data)
+    result = json.loads(data.decode("utf8"))
     if result['code'] == 0:
         result = result['data']
         replies = result['country'] + result['region'] + result['city'] + result['county'] + result['isp']
@@ -29,9 +25,9 @@ def ipv4Search(ip):
     return replies
 
 def ipv6Search(ip):
-    response = urllib2.urlopen(GeoIPURL + urllib.quote(ip.encode("utf8")))
+    response = urllib.request.urlopen(GeoIPURL + urllib.request.quote(ip.encode("utf8")))
     data = response.read()
-    result = json.loads(data.strip())
+    result = json.loads(data.decode("utf8").strip())
     if result['status'] == "success":
         replies = result['country'] + ", " + result['regionName'] + ", " + result['city'] + ", " + result['isp']
     else:

@@ -1,14 +1,11 @@
 #-*- encoding: utf-8 -*-
 
-import sys
-reload(sys).setdefaultencoding("utf8")
-
-import chat
-import joke
-import maxim
-import sm
-import trick
-import weather
-import ip
-import ping
-import py3exec
+import function.webapi.chat
+import function.webapi.joke
+import function.webapi.maxim
+import function.webapi.sm
+import function.webapi.trick
+import function.webapi.weather
+import function.webapi.ip
+import function.webapi.ping
+import function.webapi.py3exec
