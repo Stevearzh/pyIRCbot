@@ -3,6 +3,7 @@
 import socket
 import time
 import re
+import function
 from function.webapi.ip import reIPv4
 from function.webapi.ip import reIPv6
 from function.webapi.ip import reURL
