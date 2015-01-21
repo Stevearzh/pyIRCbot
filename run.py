@@ -12,7 +12,7 @@ ircPort = 8000
 botName = "bzzzt"
 botPass = ""
 ircChan = "#linuxba"
-ircLeng = 120
+ircLeng = 160
 
 
 filterMap = [

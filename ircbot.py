@@ -46,9 +46,10 @@ class ircBot:
 					if tail + 1 < len(replies):
 						tail = tail + 1
 					else:
+						tail = head + limit
 						break
 				for reply in replies[head:tail].strip().split("\n"):
-					if times < 10:
+					if times < 15:
 						if tonick:
 							self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
 						else:
