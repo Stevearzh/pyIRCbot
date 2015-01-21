@@ -40,32 +40,42 @@ class ircBot:
 		if len(replies) > limit:
 			head = 0;
 			tail = limit;
+			times = 0
 			while tail < len(replies):
 				while ord(replies[tail]) & 0xc0 != 0x80:
 					if tail + 1 < len(replies):
 						tail = tail + 1
 					else:
 						break
-				if tonick:
-					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:tail].replace("\n", ""))).encode())
-				else:
-					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:tail].replace("\n", "")).encode())
-				print(">>> " + replies[head:tail])
-				time.sleep(1)
+				for reply in replies[head:tail].strip().split("\n"):
+					if times < 10:
+						if tonick:
+							self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
+						else:
+							self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+						time.sleep(1)
+						print(">>> " + reply)
+						times += 1
+					else:
+						self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % "....").encode())
+						break
 				head = tail
 				tail = tail + limit
 				if tail > len(replies):
-					if tonick:
-						self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, replies[head:len(replies)].replace("\n", ""))).encode())
-					else:
-						self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % replies[head:len(replies)].replace("\n", "")).encode())
-					print(">>> " + replies[head:len(replies)])
+					for reply in replies[head:len(replies)].strip().split("\n"):
+						if tonick:
+							self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
+						else:
+							self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+						time.sleep(1)
+						print(">>> " + reply)
 		else:
 			for reply in replies.strip().split("\n"):
 				if tonick:
 					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
 				else:
 					self.Sock.send(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+				time.sleep(1)
 				print(">>> " + reply)
 
 	def searchUserLocation(self, message, check_the_water_meter = ""):

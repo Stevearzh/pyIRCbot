@@ -37,31 +37,34 @@ check_the_water_meter = ircbot.ip_once()
 bot.createConnection()
 
 while True:
-	for message in bot.receiveData():
-		print(message)
-		bot.responsePingfromServer(message)
-		bot.searchUserLocation(message, check_the_water_meter)
+	try:
+		for message in bot.receiveData():
+			print(message)
+			bot.responsePingfromServer(message)
+			bot.searchUserLocation(message, check_the_water_meter)
 
-		for (filterMod, filterFun) in filterMap:
-			try:
-				if filterFun(message):
-					fromnick = re.match(r"^:([^!]+)", message).group(1)
-					channel = re.search(R"PRIVMSG(.+?):", message).group(1).strip()
-					content = filterFun(message)
-					replies = filterMod.reply(content)
-					print("<<< " + fromnick)
-					bot.replyMessage(fromnick, replies, channel, fromnick, ircLeng)
-			except Exception as e:
-				pass
+			for (filterMod, filterFun) in filterMap:
+				try:
+					if filterFun(message):
+						fromnick = re.match(r"^:([^!]+)", message).group(1)
+						channel = re.search(R"PRIVMSG(.+?):", message).group(1).strip()
+						content = filterFun(message)
+						replies = filterMod.reply(content)
+						print("<<< " + fromnick)
+						bot.replyMessage(fromnick, replies, channel, fromnick, ircLeng)
+				except Exception as e:
+					pass
 
-		for (filterMod, filterFun) in filterMap2:
-			try:
-				if filterFun(message):
-					fromnick = re.match(r"^:([^!]+)", message).group(1)
-					channel = re.search(R"PRIVMSG(.+?):", message).group(1).strip()
-					content = filterFun(message)
-					replies = filterMod.reply(content)
-					print("<<< " + fromnick)
-					bot.replyMessage(fromnick, replies, channel)
-			except Exception as e:
-				pass
+			for (filterMod, filterFun) in filterMap2:
+				try:
+					if filterFun(message):
+						fromnick = re.match(r"^:([^!]+)", message).group(1)
+						channel = re.search(R"PRIVMSG(.+?):", message).group(1).strip()
+						content = filterFun(message)
+						replies = filterMod.reply(content)
+						print("<<< " + fromnick)
+						bot.replyMessage(fromnick, replies, channel)
+				except Exception as e:
+					pass
+	except Exception as e:
+		pass

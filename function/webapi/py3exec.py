@@ -10,7 +10,11 @@ def reply(string):
 		response = urllib.request.urlopen(py3URL + urllib.request.quote(string.encode("utf8")))
 		data = response.read()
 		result = json.loads(data.decode("utf8"))
-		finalResult = result['trace'][1]['stdout']
+		result = result['trace'][-1]
+		if "exception_msg" in result:
+			finalResult = result['exception_msg']
+		else:
+			finalResult = result['stdout']
 		if len(finalResult) == 0:
 			finalResult = "<no output>"
 		return finalResult
