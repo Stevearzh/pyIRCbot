@@ -40,10 +40,10 @@ def replyMessage(Queue, bot, fromnick, replies, channel = None, tonick = ""):
 		channel = channel or bot.Chan
 		if channel == bot.Nick:
 			channel = fromnick
+		times = 0
 		if len(replies) > lengthLimit:
 			head = 0;
 			tail = lengthLimit;
-			times = 0
 			while tail < len(replies):
 				while ord(replies[tail]) & 0xc0 != 0x80:
 					if tail + 1 < len(replies):
@@ -59,25 +59,26 @@ def replyMessage(Queue, bot, fromnick, replies, channel = None, tonick = ""):
 							Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
 						print("<<< " + reply  + "\n")
 						times += 1
-					else:
-						Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % "....").encode())
-						break
 				head = tail
 				tail = tail + lengthLimit
 				if tail > len(replies):
 					for reply in replies[head:len(replies)].strip().split("\n"):
-						if tonick:
-							Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
-						else:
-							Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
-						print("<<< " + reply + "\n")
+						if times < timesLimit:
+							if tonick:
+								Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
+							else:
+								Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+							print("<<< " + reply + "\n")
+							times += 1
 		else:
 			for reply in replies.strip().split("\n"):
-				if tonick:
-					Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
-				else:
-					Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
-				print("<<< " + reply  + "\n")
+				if times < timesLimit:
+					if tonick:
+						Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
+					else:
+						Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+					print("<<< " + reply  + "\n")
+					times += 1
 
 
 def searchUserLocation(bot, Queue, message, check_the_water_meter = ""):
@@ -90,21 +91,21 @@ def searchUserLocation(bot, Queue, message, check_the_water_meter = ""):
 			tonick = re.match(R"^:([^!]+)", message).group(1)
 			origin_ip = re.search(R"^:([^ ]+)", message).group(1).split('@')[1]
 			if re.search(reIPv4, origin_ip):
-				print("<<< " + tonick)
+				print(">>> " + tonick)
 				ip = re.search(reIPv4, origin_ip).group(0)
 				if check_the_water_meter:
 					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 				else:
 					replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 			elif re.search(reIPv6, origin_ip):
-				print("<<< " + tonick)
+				print(">>> " + tonick)
 				ip = re.search(reIPv6, origin_ip).group(0)
 				if check_the_water_meter:
 					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 				else:
 					replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 			elif re.search(reURL, origin_ip):
-				print("<<< " + tonick)
+				print(">>> " + tonick)
 				ip = re.search(reURL, origin_ip).group(0)
 				if check_the_water_meter:
 					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
