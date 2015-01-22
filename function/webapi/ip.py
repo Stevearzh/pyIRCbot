@@ -1,5 +1,3 @@
-#-*- encoding: utf-8 -*-
-
 import urllib.request
 import socket
 import json

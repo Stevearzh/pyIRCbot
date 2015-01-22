@@ -5,7 +5,7 @@ Python 版 IRC 机器人，使用环境 Python 3.x。Python 2 版本请前往：
 ## 重构计划 ##
 >1.~~重构为&nbsp;*Python 3*~~
 
->2.重构为*多线程机制*
+>2.~~重构为*多线程机制*~~
 
 >3.将&nbsp;*Docker*&nbsp;整合进机器人中
 

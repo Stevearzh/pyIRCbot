@@ -1,5 +1,3 @@
-#-*- encoding: utf-8 -*-
-
 import function.webapi.chat
 import function.webapi.joke
 import function.webapi.maxim

@@ -1,5 +1,3 @@
-#-*- encoding: utf-8 -*-
-
 import function.jieba
 
 def reply(string):
