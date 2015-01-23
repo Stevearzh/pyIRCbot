@@ -11,7 +11,7 @@ from function.webapi.ip import reIPv4
 from function.webapi.ip import reIPv6
 from function.webapi.ip import reURL
 
-lengthLimit = 140
+lengthLimit = 120
 timesLimit = 15
 
 class ip_once(object):
@@ -37,48 +37,55 @@ class ip_once(object):
 		self.aux(time.localtime().tm_mday, fn, (nick, ip))
 
 def replyMessage(Queue, bot, fromnick, replies, channel = None, tonick = ""):
-		channel = channel or bot.Chan
-		if channel == bot.Nick:
-			channel = fromnick
-		times = 0
-		if len(replies) > lengthLimit:
-			head = 0;
-			tail = lengthLimit;
-			while tail < len(replies):
-				while ord(replies[tail]) & 0xc0 != 0x80:
-					if tail + 1 < len(replies):
-						tail = tail + 1
-					else:
-						tail = head + lengthLimit
-						break
-				for reply in replies[head:tail].strip().split("\n"):
-					if times < timesLimit:
-						if tonick:
-							Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
-						else:
-							Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
-						print("<<< " + reply  + "\n")
-						times += 1
-				head = tail
-				tail = tail + lengthLimit
-				if tail > len(replies):
-					for reply in replies[head:len(replies)].strip().split("\n"):
-						if times < timesLimit:
-							if tonick:
-								Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
+	channel = channel or bot.Chan
+	if channel == bot.Nick:
+		channel = fromnick
+	times = 0
+	if len(replies) > lengthLimit:
+		for reply in replies.strip().split("\n"):
+			if times < timesLimit:
+				if len(reply) > lengthLimit:
+					head = 0
+					tail = lengthLimit
+					while tail < len(reply):
+						while ord(reply[tail]) & 0xc0 != 0x80:
+							if tail + 1 < len(reply):
+								tail +=  1
 							else:
-								Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
-							print("<<< " + reply + "\n")
+								tail = head + lengthLimit
+								break
+						if tonick:
+							Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply[head:tail])).encode())
+						else:
+							Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply[head:tail]).encode())
+						print("<<< " + reply[head:tail]  + "\n")
+						times += 1
+						head = tail
+						tail = tail + lengthLimit
+						if tail > len(reply):
+							if tonick:
+								Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply[head:len(reply)])).encode())
+							else:
+								Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply[head:len(reply)]).encode())
+							print("<<< " + reply[head:len(reply)] + "\n")
 							times += 1
-		else:
-			for reply in replies.strip().split("\n"):
-				if times < timesLimit:
+				else:
 					if tonick:
 						Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
 					else:
 						Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
 					print("<<< " + reply  + "\n")
 					times += 1
+
+	else:
+		for reply in replies.strip().split("\n"):
+			if times < timesLimit:
+				if tonick:
+					Queue.put(("PRIVMSG " + channel + " :"  + "%s: %s\r\n" % (tonick, reply)).encode())
+				else:
+					Queue.put(("PRIVMSG " + channel + " :"  + "%s\r\n" % reply).encode())
+				print("<<< " + reply  + "\n")
+				times += 1
 
 
 def searchUserLocation(bot, Queue, message, check_the_water_meter = ""):
