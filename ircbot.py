@@ -143,8 +143,14 @@ class filterFun(threading.Thread):
 		]
 
 	def run(self):
-		for (filterMod, filterFun) in self.Map:
-			try:
+		if re.search(R"PRIVMSG(.+?):\>n (.+)", self.String):
+			newNick = re.search(R"PRIVMSG(.+?):\>n (.+)", self.String).group(2).strip()
+			fromnick = re.match(r"^:([^!]+)", self.String).group(1)
+			print(">>> " + fromnick + ": " + newNick + "\n")
+			self.Queue.put(("NICK :"  + newNick + "\r\n").encode())
+
+		try:
+			for (filterMod, filterFun) in self.Map:
 				if filterFun(self.String):
 					fromnick = re.match(R"^:([^!]+)", self.String).group(1)
 					channel = re.search(R"PRIVMSG(.+?):", self.String).group(1).strip()
@@ -152,10 +158,8 @@ class filterFun(threading.Thread):
 					replies = filterMod.reply(content)
 					print(">>> " + fromnick + ": " + content + "\n")
 					replyMessage(self.Queue, self.Bot, fromnick, replies, channel, fromnick)
-			except Exception as e:
-				pass
-		for (filterMod, filterFun) in self.Map2:
-			try:
+
+			for (filterMod, filterFun) in self.Map2:
 				if filterFun(self.String):
 					fromnick = re.match(r"^:([^!]+)", self.String).group(1)
 					channel = re.search(R"PRIVMSG(.+?):", self.String).group(1).strip()
@@ -163,8 +167,8 @@ class filterFun(threading.Thread):
 					replies = filterMod.reply(content)
 					print(">>> " + fromnick + ": " + content + "\n")
 					replyMessage(self.Queue, self.Bot, fromnick, replies, channel)
-			except Exception as e:
-				pass
+		except Exception as e:
+			pass
 
 
 class sendQueue(threading.Thread):
