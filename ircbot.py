@@ -149,8 +149,8 @@ class filterFun(threading.Thread):
 			print(">>> " + fromnick + ": " + newNick + "\n")
 			self.Queue.put(("NICK :"  + newNick + "\r\n").encode())
 
-		try:
-			for (filterMod, filterFun) in self.Map:
+		for (filterMod, filterFun) in self.Map:
+			try:
 				if filterFun(self.String):
 					fromnick = re.match(R"^:([^!]+)", self.String).group(1)
 					channel = re.search(R"PRIVMSG(.+?):", self.String).group(1).strip()
@@ -158,8 +158,11 @@ class filterFun(threading.Thread):
 					replies = filterMod.reply(content)
 					print(">>> " + fromnick + ": " + content + "\n")
 					replyMessage(self.Queue, self.Bot, fromnick, replies, channel, fromnick)
+			except Exception as e:
+				pass
 
-			for (filterMod, filterFun) in self.Map2:
+		for (filterMod, filterFun) in self.Map2:
+			try:
 				if filterFun(self.String):
 					fromnick = re.match(r"^:([^!]+)", self.String).group(1)
 					channel = re.search(R"PRIVMSG(.+?):", self.String).group(1).strip()
@@ -167,8 +170,8 @@ class filterFun(threading.Thread):
 					replies = filterMod.reply(content)
 					print(">>> " + fromnick + ": " + content + "\n")
 					replyMessage(self.Queue, self.Bot, fromnick, replies, channel)
-		except Exception as e:
-			pass
+			except Exception as e:
+				pass
 
 
 class sendQueue(threading.Thread):
