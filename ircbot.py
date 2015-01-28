@@ -149,6 +149,14 @@ class filterFun(threading.Thread):
 			print(">>> " + fromnick + ": " + newNick + "\n")
 			self.Queue.put(("NICK :"  + newNick + "\r\n").encode())
 
+		if re.search(R"PRIVMSG(.+?):\>a (.+)", self.String):
+			action = re.search(R"PRIVMSG(.+?):\>a (.+)", self.String).group(2).strip()
+			fromnick = re.match(r"^:([^!]+)", self.String).group(1)
+			channel = re.search(R"PRIVMSG(.+?):", self.String).group(1).strip()
+			reply = chr(1) + "ACTION " + action
+			print(">>> " + fromnick + ": " + action + "\n")
+			replyMessage(self.Queue, self.Bot, fromnick, reply, channel)
+
 		for (filterMod, filterFun) in self.Map:
 			try:
 				if filterFun(self.String):
