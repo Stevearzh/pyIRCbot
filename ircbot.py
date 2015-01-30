@@ -153,7 +153,7 @@ class filterFun(threading.Thread):
 			action = re.search(R"PRIVMSG(.+?):\>a (.+)", self.String).group(2).strip()
 			fromnick = re.match(r"^:([^!]+)", self.String).group(1)
 			channel = re.search(R"PRIVMSG(.+?):", self.String).group(1).strip()
-			reply = chr(1) + "ACTION " + action
+			reply = chr(1) + "ACTION " + action + chr(1)
 			print(">>> " + fromnick + ": " + action + "\n")
 			replyMessage(self.Queue, self.Bot, fromnick, reply, channel)
 
