@@ -101,23 +101,23 @@ def searchUserLocation(bot, Queue, message, check_the_water_meter = ""):
 				print(">>> " + tonick)
 				ip = re.search(reIPv4, origin_ip).group(0)
 				if check_the_water_meter:
-					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + "_" + ip + "_" + function.webapi.ip.reply(ip)), tonick, ip)
+					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 				else:
-					replyMessage(Queue, bot, "", tonick + "_" + ip + "_" + function.webapi.ip.reply(ip))
+					replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 			elif re.search(reIPv6, origin_ip):
 				print(">>> " + tonick)
 				ip = re.search(reIPv6, origin_ip).group(0)
 				if check_the_water_meter:
-					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + "_" + ip + "_" + function.webapi.ip.reply(ip)), tonick, ip)
+					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 				else:
-					replyMessage(Queue, bot, "", tonick + "_" + ip + "_" + function.webapi.ip.reply(ip))
+					replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 			elif re.search(reURL, origin_ip):
 				print(">>> " + tonick)
 				ip = re.search(reURL, origin_ip).group(0)
 				if check_the_water_meter:
-					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + "_" + ip + "_" + function.webapi.ip.reply(ip)), tonick, ip)
+					check_the_water_meter(lambda nick, ip: replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip)), tonick, ip)
 				else:
-					replyMessage(Queue, bot, "", tonick + "_" + ip + "_" + function.webapi.ip.reply(ip))
+					replyMessage(Queue, bot, "", tonick + " " + ip + " " + function.webapi.ip.reply(ip))
 
 
 class filterFun(threading.Thread):
