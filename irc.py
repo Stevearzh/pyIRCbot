@@ -1,3 +1,5 @@
+from http.server import BaseHTTPRequestHandler, HTTPServer
+import json
 import queue
 import re
 import socket
@@ -35,9 +37,8 @@ class resp_ping(threading.Thread):
             print("<<< " + send_back.decode().strip() + "\n")
             
 class deal_irc_msg(threading.Thread):
-    def __init__(self, queue, bot, string):
+    def __init__(self, bot, string):
         threading.Thread.__init__(self)
-        self.queue  = queue
         self.bot    = bot
         self.string = string
     
@@ -46,15 +47,33 @@ class deal_irc_msg(threading.Thread):
             from_nick = re.match(R"^:([^!]+)", self.string).group(1)
             channel   = re.search(R"PRIVMSG(.+?):", self.string).group(1).strip() or self.bot.chan
             message   = re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip()
-            replies   = "[" + from_nick + "]" + message
+            replies   = "[" + from_nick + "] " + message
             
             if channel == self.bot.nick:
                 channel = from_nick
             else:
                 urllib.request.urlopen(self.bot.we_send + urllib.request.quote(replies.encode("utf8")))
+                
+class listen_we_msg(threading.Thread):
+    def __init__(self, bot, queue):
+        threading.Thread.__init__(self)
+        self.bot   = bot
+        self.queue = queue
+        
+    class http_server_handler(BaseHTTPRequestHandler):        
+        def do_POST(self):
+            content_len = int(self.headers["Content-Length"])
+            post_data   = self.rfile.read(content_len)
+            result      = json.loads(post_data.decode("utf8"))            
+            print(result)
+        
+    def start(self):
+        print(">>> START Listening...")
+        (HTTPServer(self.bot.we_recv, self.http_server_handler)).serve_forever()
+
 
 class irc_bot(threading.Thread):
-    def __init__(self, host, port, nick, password, channel, we_send):
+    def __init__(self, host, port, nick, password, channel, we_send, we_recv):
         threading.Thread.__init__(self)
         self.host     = host
         self.port     = port
@@ -62,6 +81,7 @@ class irc_bot(threading.Thread):
         self.password = password
         self.chan     = channel
         self.we_send  = we_send
+        self.we_recv  = we_recv
         self.sock     = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     def run(self):
@@ -81,6 +101,7 @@ class irc_bot(threading.Thread):
                 for line in self.sock.makefile():
                     print(line)
                     (resp_ping(msg_queue, line)).start()
-                    (deal_irc_msg(msg_queue, self, line)).start()
+                    (deal_irc_msg(self, line)).start()
+                    (listen_we_msg(self, msg_queue)).start()
             except Exception as e:
                 pass
