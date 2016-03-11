@@ -16,6 +16,6 @@ Python 版 IRC 机器人，使用环境 Python 3.x。Python 2 版本请前往：
 
 3. 运行 group.pl 查询所要连通的微信群 id；
 
-4. 编辑 run.py，将相应的 IRC 参数以及上一步获取的微信群 id 写入文件；
+4. 编辑 irc.py，将相应的 IRC 参数以及上一步获取的微信群 id 写入文件；
 
-5. 运行 run.py
+5. 运行 irc.py
