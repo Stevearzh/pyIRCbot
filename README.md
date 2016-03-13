@@ -6,8 +6,6 @@ Python 版 IRC 机器人，使用环境 Python 3.x。Python 2 版本请前往：
 ## wesync ##
 连通微信群和 IRC 频道，基于 [Mojo-Weixin](https://github.com/sjdy521/Mojo-Weixin) 提供的 API 完成。
 
-目前已实现 IRC 频道消息至微信群的单向传递，微信群消息至 IRC 频道的功能仍在编写中。
-
 
 ## 使用方法 ##
 1. 参照 [Mojo-Weixin 的安装说明](https://github.com/sjdy521/Mojo-Weixin#安装方法) 安装 Mojo::Weixin 模块；
