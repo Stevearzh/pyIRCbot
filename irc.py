@@ -13,11 +13,11 @@ from socketserver import ThreadingMixIn
 
 
 IRC_HOST   = "irc.freenode.net"
-IRC_PORT   = 8000
+IRC_PORT   = 6666
 BOT_NAME   = "wesync"
 BOT_PASS   = ""
 IRC_CHAN   = "#archlinux-cn"
-GROUP_ID   = "@@5c26b71b5a4a41e7db9ad0ee536444acc875a247cfd96ceb5d68bfaf3a953bd1"
+GROUP_ID   = "@@78420cc01117e6c95e839a524adc4c36e70e406cdab2efad133c04f799fc60bf"
 WE_SEND    = "http://127.0.0.1:3000/openwx/send_group_message?id=" + GROUP_ID + "&content="
 WE_RECV    = ('127.0.0.1', 4000)   # address, port
 MSG_QUEUE  = queue.Queue()
@@ -98,7 +98,7 @@ class deal_irc_msg(threading.Thread):
         if re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip():
             from_nick = re.match(R"^:([^!]+)", self.string).group(1)
             channel   = re.search(R"PRIVMSG(.+?):", self.string).group(1).strip() or self.bot.chan
-            message   = re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip()
+            message   = re.sub(R"\x03(?:\d{1,2}(?:,\d{1,2})?)?", "", re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip())
             replies   = "[" + from_nick + "] " + message
             
             if channel == self.bot.nick:
@@ -113,7 +113,7 @@ class base_handler(BaseHTTPRequestHandler):
         self.send_response(200)
      
         # Send headers
-        self.send_header('Content-type','text/html')
+        self.send_header("Content-type", "text/html")
         self.end_headers()
      
         # Send message back to client
@@ -175,6 +175,7 @@ class irc_bot(threading.Thread):
         while True:
             try:                
                 for line in self.sock.makefile():
+                    print(line)
                     (resp_ping(MSG_QUEUE, line)).start()
                     (deal_irc_msg(self, line)).start()
             except Exception as e:
