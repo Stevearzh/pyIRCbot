@@ -17,7 +17,7 @@ IRC_PORT   = 6666
 BOT_NAME   = "wesync"
 BOT_PASS   = ""
 IRC_CHAN   = "#archlinux-cn"
-GROUP_ID   = "@@78420cc01117e6c95e839a524adc4c36e70e406cdab2efad133c04f799fc60bf"
+GROUP_ID   = "@@977116cf4b1e4fd55277acefaf3d97a5b1085130a09ae5f273b23c50f4060d9c"
 WE_SEND    = "http://127.0.0.1:3000/openwx/send_group_message?id=" + GROUP_ID + "&content="
 WE_RECV    = ('127.0.0.1', 4000)   # address, port
 MSG_QUEUE  = queue.Queue()
@@ -98,7 +98,7 @@ class deal_irc_msg(threading.Thread):
         if re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip():
             from_nick = re.match(R"^:([^!]+)", self.string).group(1)
             channel   = re.search(R"PRIVMSG(.+?):", self.string).group(1).strip() or self.bot.chan
-            message   = re.sub(R"\x03(?:\d{1,2}(?:,\d{1,2})?)?", "", re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip())
+            message   = re.sub(R"\x03(?:\d{1,2}(?:,\d{1,2})?)?|\u000F", "", re.search(R"PRIVMSG(.+?):(.+)", self.string).group(2).strip())
             replies   = "[" + from_nick + "] " + message
             
             if channel == self.bot.nick:
